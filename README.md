@@ -1,35 +1,16 @@
 # ync-database
 
-This part is to explore all different types of databases; The initialization flow is thought to deploy a database and expanding incrementally through jobs and predefined routines. One directory contains database intializer scripting: `ync-job`. All other are database configurator, for every `ync-<database-distro>` directory.
-
-For a more detailed description of deployment, see the readme file at `ync/deployment/README.md`.
+This project aims to be able to deploy and manage easily any database in a kubernetes cluster. This was thought to explore any type (SQL, NoSQL, Graph, Vector) and database distros. Every database disro implemented has it's on `ync-<distro>` folder containing every file needed to configure the database and a Dockerfile to deploy it in a kubernetes environment. Among those folders lies: *`ync-job`*, a solution to run any script & commands agiainst a given database. This has been thought as to be able to modify a database on the go without having any downtime in production.
 
 ## ync-job
 
-For each distro available there is a directory associated to it. Each directory is able to initialize a specific database engine; a `Dockerfile` can be found in each of them to execute commands needed to run a routine that can be modified at running time. Each collection,keyspace,database ... (or whatever domination used), should be parted in differents directories and should specify the execution's order of scripts thanks to an indexing mechanism.
+(To better understand how this works, the Dockerfile can be a great entrypoint.)
+This is an all in one solution to scripts agains a given database distro.
 
-## ync-cassandra
+- `installer.sh`: installs commands and dependency to be able to communicate/run scripts agains a database through bash.
 
-The `Dockerfile` uses the `cassandra.yaml` as instructor for database initialization and `credentials.conf` is used to be able to connect to cqlsh without typing login information.
+- `ync-job.sh`: is the container entrypoint. It serves a job to run files (even folders) agains a given database.
 
-The remaining `.cql` files are executed after the database cluster is up and running.
-
-    docker run -d -p 9042:9042 --name cassandra ync-cassandra
-
-## ync-mongodb
-
-Only a docker file is needed to set up an initial admin login.
-
-    docker run -d -p 27017:27017 --name mongodb ync-mongodb
-
-## Storage spaces
-
-### store
-
-This component aims to store anything needed to keep track of a user's basket and commands passed by users. The 'store' __keyspace__ will track what a user has put in his basket and what command.s he made:
-
-- `store.Session`: a table to identify each existing session in a store.
-- `store.Basket`: all information about the user's basket.
-- `store.Command`: all informations the user has sent us to deliver the package.
-- `store.Item`: every item that has been and is currently available in the store.
-
+- For each distro:
+    - folders containing database distro scripts.
+    - `job.sh`: the command ran to apply scripts to the database
